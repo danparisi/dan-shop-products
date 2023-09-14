@@ -1,0 +1,5 @@
+debug: true
+
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092

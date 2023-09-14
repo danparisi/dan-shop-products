@@ -1,0 +1,37 @@
+debug: true
+
+dan:
+  kafka:
+    producer:
+      topics:
+        logs: dan-service-logs
+
+spring:
+  application:
+    name: dan-shop-products-service
+  cloud:
+    kubernetes:
+      loadbalancer:
+        mode: SERVICE
+  kafka:
+    bootstrap-servers: dan-kafka-cluster-kafka-bootstrap:9092
+    consumer:
+      group-id: ${spring.application.name}
+  endpoint:
+    health:
+      show-details: "ALWAYS"
+  endpoints:
+    web:
+      base-path: /
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true

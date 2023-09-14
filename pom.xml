@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.1.2</version>
+        <relativePath/> <!-- lookup parent from repository -->
+    </parent>
+
+    <groupId>com.danshop</groupId>
+    <artifactId>products</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <name>dan-shop-products</name>
+
+    <properties>
+        <java.version>17</java.version>
+        <spring-cloud.version>2022.0.3</spring-cloud.version>
+
+        <log-back.version>1.4.11</log-back.version>
+        <helm-maven-plugin.version>6.10.1</helm-maven-plugin.version>
+        <logstash-logback-encoder.version>7.4</logstash-logback-encoder.version>
+        <dockerfile-maven-plugin.version>1.4.13</dockerfile-maven-plugin.version>
+        <helm.repository.release.port>30600</helm.repository.release.port>
+        <helm.repository.release.host>minikube.nexus-dan-helm-release-http</helm.repository.release.host>
+        <helm.repository.snapshot.port>30601</helm.repository.snapshot.port>
+        <helm.repository.snapshot.host>minikube.nexus-dan-helm-snapshot-http</helm.repository.snapshot.host>
+
+        <docker.repository.release>minikube.nexus-dan-docker-release-http:30500</docker.repository.release>
+        <docker.repository.snapshot>minikube.nexus-dan-docker-snapshot-http:30501</docker.repository.snapshot>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-kubernetes-client-loadbalancer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-openfeign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>${logstash-logback-encoder.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.danielwegener</groupId>
+            <artifactId>logback-kafka-appender</artifactId>
+            <version>0.2.0-RC2</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.kokuwa.maven</groupId>
+            <artifactId>helm-maven-plugin</artifactId>
+            <version>${helm-maven-plugin.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock</artifactId>
+            <version>3.0.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <!--Maven support for Docker integration. We configure the image to be part of the specified Docker repository,
+                specify the image tag based on the build version and also add the new build as 'latest'.-->
+                <groupId>com.spotify</groupId>
+                <artifactId>dockerfile-maven-plugin</artifactId>
+                <version>${dockerfile-maven-plugin.version}</version>
+                <configuration>
+                    <tag>${project.version}</tag>
+                    <repository>${docker.repository.snapshot}/repository/docker/${project.name}</repository>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>io.kokuwa.maven</groupId>
+                <artifactId>helm-maven-plugin</artifactId>
+                <version>${helm-maven-plugin.version}</version>
+                <configuration>
+                    <!-- Allow HTTP registry -->
+                    <insecure>true</insecure>
+                    <skipUpgrade>false</skipUpgrade>
+                    <upgradeForce>true</upgradeForce>
+                    <skipPushLogin>true</skipPushLogin>
+                    <releaseName>${project.name}</releaseName>
+                    <chartVersion>${project.version}</chartVersion>
+                    <upgradeWithInstall>true</upgradeWithInstall>
+                    <repositoryAddForceUpdate>true</repositoryAddForceUpdate>
+                    <chartDirectory>${project.basedir}/${project.name}</chartDirectory>
+                    <autoDetectLocalHelmBinary>false</autoDetectLocalHelmBinary>
+                    <helmDownloadUrl>https://get.helm.sh/helm-v3.12.2-linux-amd64.tar.gz</helmDownloadUrl>
+
+                    <uploadRepoStable>
+                        <name>release-repo</name>
+                        <url>${helm.repository.release.host}:${helm.repository.release.port}</url>
+                        <type>NEXUS</type>
+                        <!-- TODO: Replace with secrets -->
+                        <username>jenkins</username>
+                        <password>jenkins</password>
+                    </uploadRepoStable>
+                    <uploadRepoSnapshot>
+                        <name>snapshot-repo</name>
+                        <url>${helm.repository.snapshot.host}:${helm.repository.snapshot.port}</url>
+                        <type>NEXUS</type>
+                        <!-- TODO: Replace with secrets -->
+                        <username>jenkins</username>
+                        <password>jenkins</password>
+                    </uploadRepoSnapshot>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
