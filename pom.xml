@@ -142,7 +142,6 @@
                     </execution>
                 </executions>
             </plugin>
-
             <plugin>
                 <!--Maven support for Docker integration. We configure the image to be part of the specified Docker repository,
                 specify the image tag based on the build version and also add the new build as 'latest'.-->
@@ -198,5 +197,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>nexus-server-snapshots</id>
+            <url>http://nexus-service-web-ui:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+
+        <repository>
+            <id>nexus-server-releases</id>
+            <url>http://nexus-service-web-ui:8081/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
 
 </project>
