@@ -3,6 +3,7 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
     <springProperty name="logs-topic" source="dan.kafka.producer.topics.logs"/>
+    <springProperty name="spring-application-name" source="spring.application.name"/>
     <springProperty name="bootstrap-servers" source="spring.kafka.bootstrap-servers"/>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -22,9 +23,10 @@
     <appender name="asynchronous-kafka-appender" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <layout class="net.logstash.logback.layout.LogstashLayout"/>
+            <customFields>{"application_name":"${spring-application-name}"}</customFields>
         </encoder>
 
-        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy"/>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy"/>
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
 
         <topic>${logs-topic}</topic>
@@ -32,12 +34,17 @@
         <producerConfig>linger.ms=100</producerConfig>
         <producerConfig>max.block.ms=100</producerConfig>
         <producerConfig>bootstrap.servers=${bootstrap-servers}</producerConfig>
-        <producerConfig>client.id=${HOSTNAME}-${CONTEXT_NAME}-logback-relaxed</producerConfig>
+        <producerConfig>client.id=${HOSTNAME}-${CONTEXT_NAME}-logback</producerConfig>
 
     </appender>
 
     <root level="info">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="asynchronous-kafka-appender"/>
+
+        <if condition='!"${spring.profiles.active}".contains("local")'>
+            <then>
+                <appender-ref ref="asynchronous-kafka-appender"/>
+            </then>
+        </if>
     </root>
 </configuration>
