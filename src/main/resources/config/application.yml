@@ -1,0 +1,6 @@
+# Testing properties precedence
+test-property: source-dan-shop-products-service-config-application-yaml
+
+spring:
+  application:
+    name: dan-shop-products-service

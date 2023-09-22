@@ -35,7 +35,7 @@ import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static reactor.core.publisher.Flux.just;
 
-@EmbeddedKafka
+@EmbeddedKafka//(ports = 9092)
 @Import(LoadBalancerTestConfiguration.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 class ProductsIntegrationTest {
