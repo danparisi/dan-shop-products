@@ -4,3 +4,14 @@ test-property: source-dan-shop-products-service-config-application-yaml
 spring:
   application:
     name: dan-shop-products-service
+  datasource:
+    url: jdbc:mariadb://mariadb:3306/dan_shop_products
+    username: root
+    password: LNqRhw5m1w
+  jpa:
+    generate-ddl: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MariaDBDialect

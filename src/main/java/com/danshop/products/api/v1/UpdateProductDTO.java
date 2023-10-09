@@ -16,10 +16,8 @@ import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseS
 @JsonInclude(NON_NULL)
 @JsonNaming(SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProductDTO {
+public class UpdateProductDTO {
 
-    @NotEmpty
-    private String code;
     @NotEmpty
     private String name;
     @Default

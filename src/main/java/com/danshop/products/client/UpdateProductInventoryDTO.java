@@ -1,27 +1,29 @@
-package com.danshop.products.api.v1;
+package com.danshop.products.client;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import jakarta.validation.constraints.NotEmpty;
 import lombok.Builder;
 import lombok.Builder.Default;
 import lombok.Data;
 
+import java.util.OptionalInt;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy;
+import static java.util.OptionalInt.empty;
 
 @Data
 @Builder
 @JsonInclude(NON_NULL)
 @JsonNaming(SnakeCaseStrategy.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ProductDTO {
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+public class UpdateProductInventoryDTO {
 
-    @NotEmpty
-    private String code;
-    @NotEmpty
-    private String name;
     @Default
-    private int quantity = 0;
+    private OptionalInt innerQuantity = empty();
+    @Default
+    private OptionalInt supplierQuantity = empty();
+
 }
